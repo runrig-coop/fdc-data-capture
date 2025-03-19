@@ -1,0 +1,67 @@
+import type { Observer } from '../../../src/observer';
+
+function validate(maybeUrl: any) {
+  try { return new URL(maybeUrl) && true; }
+  catch (_) { return false; }
+}
+
+export interface DataCapOpts {
+  verbose?: boolean;
+}
+
+export default class DataCapture implements Observer<string> {
+  private _url: URL | null = null;
+
+  public verbose: boolean = false;
+
+  constructor(maybeUrl?: URL | string, options?: DataCapOpts) {
+    if (options) {
+      const { verbose = false } = options;
+      this.verbose = verbose;
+    }
+
+    if (!maybeUrl && this.verbose) {
+      const msg =
+        'DataCapture observer was initialized without a destination URL. ' +
+        'Set DataCapture.prototype.url to a valid URL to begin capturing ' +
+        'data from the DFC Connector\'s export events.';
+      console.warn(msg);
+    }
+    else if (maybeUrl) this.url = maybeUrl;
+  }
+
+  get url (): URL | null {
+    return this._url;
+  }
+
+  set url(maybeUrl: any) {
+    if (validate(maybeUrl)) this._url = new URL(maybeUrl);
+    else {
+      const msg =
+        `An attempt to set the DataCapture observer's destination URL failed ` +
+        `because a non-nullish but invalid URL was provided: ${maybeUrl}. ` +
+        `The stored URL has reverted to its previous value: ${this.url}.`;
+      throw new Error(msg);
+    }
+  }
+
+  next(json: string): void {
+    if (this._url) {
+      const request = fetch(this._url, { method: 'POST', body: json });
+      if (this.verbose) {
+        request.then((response) => { console.info(response); })
+          .catch((reason) => { console.error(reason); });
+      }
+    }
+  }
+
+  error(error: Error): void {
+    if (this.verbose) console.error(error);
+  }
+
+  complete(): void {
+    if (this.verbose) {
+      console.info(`DataCapture observer for ${this._url} has been closed.`);
+    }
+  }
+}
