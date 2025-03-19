@@ -10,38 +10,19 @@ interface DataCapState {
 
 type OptionOverrides = DataCapOpts & {
   url?: ConstructorParameters<typeof DataCapture>[0];
-  force?: boolean;
 }
 
 export default function useDataCapture(connector: Connector, overrides: OptionOverrides = {}): DataCapState {
   // @ts-ignore
   const { env = {} } = process || {};
   let {
-    EXPERIMENTAL_DATA_CAPTURE_ENABLED: enabled = false,
     EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL: url = '',
     EXPERIMENTAL_DATA_CAPTURE_VERBOSE: verbose = false,
   } = env;
 
-  if ('force' in overrides) enabled = overrides.force;
   if ('url' in overrides) url = overrides.url;
   if ('verbose' in overrides) verbose = overrides.verbose;
   const opts = { verbose };
-
-  if (!enabled) {
-    const observer = new DataCapture(undefined, opts);
-    const subscription = connector.subscribe('export', observer);
-    observer.complete();
-    subscription.unsubscribe();
-    if (verbose === true) {
-      const msg = `A new DataCapture observer was instantiated but it was ` +
-        `immediately cancelled and unsubscribed from the connector because ` +
-        `the environment variable EXPERIMENTAL_DATA_CAPTURE_ENABLED was not ` +
-        `set to true. To override or force the environment variables, pass ` +
-        `the flag { force: true } as the second parameter to useDataCapture.`;
-      console.warn(msg);
-    }
-    return { observer, subscription };
-  }
 
   // An explicitly undefined or nullish url parameter (eg, '') will never throw,
   // but a malformed string or other invalid object may. Therefore, the observer
