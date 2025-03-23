@@ -1,7 +1,8 @@
 import type { Observer } from '../../../src/observer';
 
-function validate(maybeUrl: any) {
-  try { return new URL(maybeUrl) && true; }
+function validate(maybeUrl: unknown): URL | false {
+  if (!(maybeUrl instanceof URL || typeof maybeUrl === 'string')) return false;
+  try { return new URL(maybeUrl); }
   catch (_) { return false; }
 }
 
@@ -20,22 +21,24 @@ export default class DataCapture implements Observer<string> {
       this.verbose = verbose;
     }
 
-    if (!maybeUrl && this.verbose) {
+    const url = validate(maybeUrl);
+    if (url) this._url = url;
+    else if (this.verbose) {
       const msg =
         'DataCapture observer was initialized without a destination URL. ' +
         'Set DataCapture.prototype.url to a valid URL to begin capturing ' +
         'data from the DFC Connector\'s export events.';
       console.warn(msg);
     }
-    else if (maybeUrl) this.url = maybeUrl;
   }
 
   get url (): URL | null {
     return this._url;
   }
 
-  set url(maybeUrl: any) {
-    if (validate(maybeUrl)) this._url = new URL(maybeUrl);
+  set url(maybeUrl: unknown) {
+    const url = validate(maybeUrl);
+    if (url) this._url = url;
     else {
       const msg =
         `An attempt to set the DataCapture observer's destination URL failed ` +

@@ -12,7 +12,7 @@ type OptionOverrides = DataCapOpts & {
   url?: ConstructorParameters<typeof DataCapture>[0];
 }
 
-export default function useDataCapture(connector: Connector, overrides: OptionOverrides = {}): DataCapState {
+export default function useDataCapture(connector: Connector, overrides?: OptionOverrides): DataCapState {
   // @ts-ignore
   const { env = {} } = process || {};
   let {
@@ -20,27 +20,17 @@ export default function useDataCapture(connector: Connector, overrides: OptionOv
     EXPERIMENTAL_DATA_CAPTURE_VERBOSE: verbose = false,
   } = env;
 
-  if ('url' in overrides) url = overrides.url;
-  if ('verbose' in overrides) verbose = overrides.verbose;
+  if (overrides?.url) url = overrides.url;
+  if (typeof overrides?.verbose === 'boolean') verbose = overrides.verbose;
   const opts = { verbose };
 
-  // An explicitly undefined or nullish url parameter (eg, '') will never throw,
-  // but a malformed string or other invalid object may. Therefore, the observer
-  // is instantiated without a URL, only the options, then set separately via
-  // assignment, safely within a try..catch block.
-  const observer = new DataCapture(undefined, opts);
-  try {
-    observer.url = url;
-    if (verbose === true) {
-      const msg = `A new DataCapture observer was instantiated with a ` +
-        `destination URL of ${url}.`;
-      console.info(msg);
-    }
-  } catch (error) {
-    if (verbose === true) console.error(error);
+  const observer = new DataCapture(url, opts);
+  if (verbose === true) {
+    const msg = `A new DataCapture observer was instantiated with a ` +
+      `destination URL of ${url}.`;
+    console.info(msg);
   }
 
-  // Subscribe to export events regardless; a new url can be set later.
   const subscription = connector.subscribe('export', observer);
 
   return { observer, subscription };
