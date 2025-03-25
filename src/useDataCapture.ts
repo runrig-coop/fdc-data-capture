@@ -1,7 +1,8 @@
 import type Connector from '../../../src/Connector';
 import type { Subscription } from '../../../src/observer';
-import DataCapture from './DataCapture';
 import type { DataCapOpts } from './DataCapture';
+import DataCapture from './DataCapture';
+import { getEnvVarBool, getEnvVarString } from './env';
 
 interface DataCapState {
   observer: DataCapture;
@@ -13,18 +14,14 @@ type OptionOverrides = DataCapOpts & {
 }
 
 export default function useDataCapture(connector: Connector, overrides?: OptionOverrides): DataCapState {
-  // @ts-ignore
-  const { env = {} } = process || {};
-  let {
-    EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL: url = '',
-    EXPERIMENTAL_DATA_CAPTURE_VERBOSE: verbose = false,
-  } = env;
+  const verbose = typeof overrides?.verbose === 'boolean'
+    ? overrides.verbose
+    : getEnvVarBool('EXPERIMENTAL_DATA_CAPTURE_VERBOSE');
+  const url = typeof overrides?.url === 'string' || overrides?.url instanceof URL
+    ? overrides.url
+    : getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
 
-  if (overrides?.url) url = overrides.url;
-  if (typeof overrides?.verbose === 'boolean') verbose = overrides.verbose;
-  const opts = { verbose };
-
-  const observer = new DataCapture(url, opts);
+  const observer = new DataCapture(url, { verbose });
   const subscription = connector.subscribe('export', observer);
 
   return { observer, subscription };
