@@ -23,7 +23,11 @@ export default class DataCapture implements Observer<string> {
 
     const url = validate(maybeUrl);
     if (url) this._url = url;
-    else if (this.verbose) {
+    if (url && this.verbose) {
+      const msg = `A new DataCapture observer was instantiated with a ` +
+        `destination URL of ${url}.`;
+      console.info(msg);
+    } else if (this.verbose) {
       const msg =
         'DataCapture observer was initialized without a destination URL. ' +
         'Set DataCapture.prototype.url to a valid URL to begin capturing ' +

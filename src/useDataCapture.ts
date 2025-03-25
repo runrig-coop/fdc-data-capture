@@ -25,12 +25,6 @@ export default function useDataCapture(connector: Connector, overrides?: OptionO
   const opts = { verbose };
 
   const observer = new DataCapture(url, opts);
-  if (verbose === true) {
-    const msg = `A new DataCapture observer was instantiated with a ` +
-      `destination URL of ${url}.`;
-    console.info(msg);
-  }
-
   const subscription = connector.subscribe('export', observer);
 
   return { observer, subscription };
