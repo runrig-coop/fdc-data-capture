@@ -3,9 +3,9 @@
 namespace DataFoodConsortium\Connector;
 
 class DataCapure implements IConnectorObserver {
-    private string $destinationUrl;
+    private string|null $destinationUrl;
 
-    public function __construct(string $url = null) {
+    public function __construct(?string $url = null) {
         $this->setDestinationUrl($url);
     }
 
@@ -21,7 +21,7 @@ class DataCapure implements IConnectorObserver {
         }
     }
 
-    public function update(\SplSubject $connector, string $event = null, $json = null): void {
+    public function update(\SplSubject $connector, ?string $event = null, $json = null): void {
         $urlIsValid = filter_var($this->destinationUrl, FILTER_VALIDATE_URL);
         if ($event === $connector->EVENT_EXPORT && $urlIsValid) {
             $ch = curl_init($this->destinationUrl);
