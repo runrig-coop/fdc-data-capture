@@ -8,7 +8,9 @@
     "build": "tsc -p .",
     "test": "node --test test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "undici": "^7.6.0"
+  },
   "devDependencies": {
     "@jgaehring/connector": "jgaehring/connector-typescript#707368c",
     "@types/jsonld": "^1.5.7",
@@ -17,6 +19,9 @@
   },
   "peerDependencies": {
     "@jgaehring/connector": "jgaehring/connector-typescript#707368c"
+  },
+  "engines": {
+    "node": ">=20.18.1"
   },
   "repository": {
     "type": "git",
