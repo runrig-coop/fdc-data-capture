@@ -1,0 +1,30 @@
+{
+  "name": "fdc-data-capture",
+  "version": "0.0.1",
+  "description": "Aggregate semantic sales data for FDC/DFC compliant platform cooperatives.",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "test": "node --test test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jsonld": "^1.5.7",
+    "@types/node": "^22.7.6",
+    "typescript": "^4.5"
+  },
+  "peerDependencies": {
+    "@datafoodconsortium/connector": "^1.0.0-alpha.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datafoodconsortium/connector-codegen.git"
+  },
+  "author": "",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/datafoodconsortium/connector-codegen/issues"
+  },
+  "homepage": "https://github.com/datafoodconsortium/connector-codegen#readme"
+}
