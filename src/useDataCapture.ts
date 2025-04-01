@@ -14,14 +14,19 @@ type OptionOverrides = DataCapOpts & {
 }
 
 export default function useDataCapture(connector: Connector, overrides?: OptionOverrides): DataCapState {
-  const verbose = typeof overrides?.verbose === 'boolean'
-    ? overrides.verbose
-    : getEnvVarBool('EXPERIMENTAL_DATA_CAPTURE_VERBOSE');
-  const url = typeof overrides?.url === 'string' || overrides?.url instanceof URL
-    ? overrides.url
-    : getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
+  let { url, ...options } = overrides || {};
+  options as DataCapOpts;
 
-  const observer = new DataCapture(url, { verbose });
+  if (typeof options.verbose !== 'boolean') {
+    const verbose = getEnvVarBool('EXPERIMENTAL_DATA_CAPTURE_VERBOSE');
+    if (typeof verbose === 'boolean') options.verbose = verbose;
+  }
+
+  if (typeof url !== 'string' && !(url instanceof URL)) {
+    url = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
+  }
+
+  const observer = new DataCapture(url, options);
   const subscription = connector.subscribe('export', observer);
 
   return { observer, subscription };
