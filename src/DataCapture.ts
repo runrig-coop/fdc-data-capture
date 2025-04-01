@@ -1,3 +1,4 @@
+import Undici from 'undici';
 import type { Observer } from '@jgaehring/connector/lib/observer';
 
 function validate(maybeUrl: unknown): URL | false {
@@ -6,20 +7,24 @@ function validate(maybeUrl: unknown): URL | false {
   catch (_) { return false; }
 }
 
+type fetchFn = typeof Undici.fetch | typeof globalThis.fetch;
 export interface DataCapOpts {
   verbose?: boolean;
+  fetch?: fetchFn;
 }
 
 export default class DataCapture implements Observer<string> {
   private _url: URL | null = null;
+  private fetchFn: fetchFn;
 
   public verbose: boolean = false;
 
   constructor(maybeUrl?: URL | string, options?: DataCapOpts) {
-    if (options) {
-      const { verbose = false } = options;
-      this.verbose = verbose;
-    }
+    if (typeof options?.verbose === 'boolean') this.verbose = options.verbose;
+
+    if (typeof options?.fetch === 'function') this.fetchFn = options.fetch;
+    else if (typeof globalThis.fetch === 'function') this.fetchFn = globalThis.fetch;
+    else this.fetchFn = Undici.fetch;
 
     const url = validate(maybeUrl);
     if (url) this._url = url;
@@ -54,7 +59,8 @@ export default class DataCapture implements Observer<string> {
 
   next(json: string): void {
     if (this._url) {
-      const request = fetch(this._url, { method: 'POST', body: json });
+      const opts = { method: 'POST', body: json };
+      const request = this.fetchFn(this._url, opts);
       if (this.verbose) {
         request.then((response) => { console.info(response); })
           .catch((reason) => { console.error(reason); });
