@@ -1,36 +1,56 @@
 import expect from 'node:assert';
-import { test } from 'node:test';
-import { MockAgent } from 'undici';
+import { suite, test } from 'node:test';
+import { MockAgent, setGlobalDispatcher } from 'undici';
 import { Connector } from '@jgaehring/connector';
 import useDataCapture from '../dist/useDataCapture.js';
 
-const connector = new Connector();
+suite('DataCapture', async () => {
+  const agent = new MockAgent({ enableCallHistory: true });
+  setGlobalDispatcher(agent);
 
-const address = connector.createAddress({
-    semanticId: "http://myplatform.com/address/address1",
-    street: "1, place or Europe",
-    postalCode: "00001",
-    city: "Brussels",
-    country: "Belgium",
-});
+  const capOrigin = 'http://api.example.com';
+  const capPath = '/v1/triplestore';
+  const capUrl = capOrigin + capPath;
 
-const json = '{"@context":"https://www.datafoodconsortium.org","@id":"http://myplatform.com/address/address1","@type":"dfc-b:Address","dfc-b:hasCity":"Brussels","dfc-b:hasCountry":"Belgium","dfc-b:hasPostalCode":"00001","dfc-b:hasStreet":"1, place or Europe"}';
+  const connector = new Connector();
 
+  const address = connector.createAddress({
+      semanticId: "http://myplatform.com/address/address1",
+      street: "1, place or Europe",
+      postalCode: "00001",
+      city: "Brussels",
+      country: "Belgium",
+  });
 
-test('Address:import', async () => {
-  const agent = new MockAgent();
-  const dataCapOpts = { fetch: agent.request, verbose: true };
-  const { observer, subscription } = useDataCapture(connector, dataCapOpts);
-  observer.url = 'http://api.example.com/v1/triplestore';
-  observer.verbose = false;
+  const json = '{"@context":"https://www.datafoodconsortium.org","@id":"http://myplatform.com/address/address1","@type":"dfc-b:Address","dfc-b:hasCity":"Brussels","dfc-b:hasCountry":"Belgium","dfc-b:hasPostalCode":"00001","dfc-b:hasStreet":"1, place or Europe"}';
 
-  const imported = await connector.import(json);
-  const expected = imported[0];
-  expect.strictEqual(imported.length, 1);
-  expect.strictEqual(expected.equals(address), true);
+  test('useDataCapture', async () => {
+    const pool = agent.get(capOrigin);
+    pool.intercept({
+      path: capPath,
+      method: 'POST',
+    }).reply(200, ({ body }) => ({ body }));
 
-  expect.doesNotThrow(() => {
-      observer.complete();
-      subscription.unsubscribe();
-  }, '#unsubscribe');
+    const capOpts = { verbose: true };
+    const { observer, subscription } = useDataCapture(connector, capOpts);
+    observer.url = capUrl;
+    observer.verbose = false;
+
+    const serialized = await connector.export([address]);
+
+    const capCalls = agent.getCallHistory()?.filterCallsByOrigin(capOrigin);
+    expect.ok(capCalls);
+    expect.ok(capCalls.length === 1);
+
+    const [{ body }] = capCalls;
+    expect.strictEqual(body, json)
+    expect.strictEqual(serialized, json);
+
+    expect.doesNotThrow(() => {
+        observer.complete();
+        subscription.unsubscribe();
+    }, '#unsubscribe');
+
+    await pool.close();
+  });
 });
