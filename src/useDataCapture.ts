@@ -6,8 +6,8 @@ import DataCapture from './DataCapture';
 import { getEnvVarBool, getEnvVarString } from './env';
 
 interface DataCapState {
-  observer: DataCapture;
-  subscription: Subscription;
+  observer: DataCapture | null;
+  subscription: Subscription | null;
 }
 
 type OptionOverrides = DataCapOpts & {
@@ -31,8 +31,20 @@ export default function useDataCapture(connector: Connector, overrides?: OptionO
     url = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
   }
 
-  const observer = new DataCapture(url, options);
-  const subscription = connector.subscribe('export', observer);
-
-  return { observer, subscription };
+  try {
+    const observer = new DataCapture(url, options);
+    const subscription = connector.subscribe('export', observer);
+    return { observer, subscription };
+  } catch (error) {
+    if (options.verbose) {
+      console.error(error);
+      const warning = 'DataCapture failed to instantiate and cannot transmit '
+        + 'captured data to the remote store as configured. The overrides '
+        + 'passed to useDataCapture and the options passed to the DataCapture '
+        + 'constructor were the following:';
+      console.warn(warning);
+      console.table({ overrides, options });
+    }
+    return { observer: null, subscription: null };
+  }
 }
