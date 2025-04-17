@@ -1,4 +1,4 @@
-import Undici from 'undici';
+import type { fetch as UndiciFetch } from 'undici';
 import type { Observer } from '@jgaehring/connector/lib/observer';
 
 function validate(maybeUrl: unknown): URL | false {
@@ -7,7 +7,7 @@ function validate(maybeUrl: unknown): URL | false {
   catch (_) { return false; }
 }
 
-type fetchFn = typeof Undici.fetch | typeof globalThis.fetch;
+type fetchFn = typeof UndiciFetch | typeof globalThis.fetch;
 export interface DataCapOpts {
   verbose?: boolean;
   fetch?: fetchFn;
@@ -23,8 +23,17 @@ export default class DataCapture implements Observer<string> {
     if (typeof options?.verbose === 'boolean') this.verbose = options.verbose;
 
     if (typeof options?.fetch === 'function') this.fetchFn = options.fetch;
-    else if (typeof globalThis.fetch === 'function') this.fetchFn = globalThis.fetch;
-    else this.fetchFn = Undici.fetch;
+    else if (typeof globalThis?.fetch === 'function') {
+      this.fetchFn = globalThis.fetch;
+    } else {
+      const msg = 'No fetch function found. To instantiate DataCapture, '
+        + 'set options.fetch to a valid fetch function or upgrade to a valid '
+        + 'application environment that provides globalThis.fetch. For more '
+        + 'information on fetch in Node or browsers, respectively, see:\n'
+        + 'https://nodejs.org/en/learn/getting-started/fetch\n'
+        + 'https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch';
+      throw new Error(msg);
+    }
 
     const url = validate(maybeUrl);
     if (url) this._url = url;

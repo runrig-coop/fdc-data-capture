@@ -1,3 +1,4 @@
+import Undici from 'undici';
 import type { Connector } from '@jgaehring/connector';
 import type { Subscription } from '@jgaehring/connector/lib/observer';
 import type { DataCapOpts } from './DataCapture';
@@ -16,6 +17,10 @@ type OptionOverrides = DataCapOpts & {
 export default function useDataCapture(connector: Connector, overrides?: OptionOverrides): DataCapState {
   let { url, ...options } = overrides || {};
   options as DataCapOpts;
+
+  const fetchIsMissing = typeof options.fetch !== 'function'
+    && typeof globalThis?.fetch !== 'function';
+  if (fetchIsMissing) options.fetch = Undici.fetch;
 
   if (typeof options.verbose !== 'boolean') {
     const verbose = getEnvVarBool('EXPERIMENTAL_DATA_CAPTURE_VERBOSE');
