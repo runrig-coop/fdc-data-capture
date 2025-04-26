@@ -1,4 +1,5 @@
-import Undici from 'undici';
+import { Buffer } from 'node:buffer';
+import Undici, { Headers } from 'undici';
 import type { Connector } from '@jgaehring/connector';
 import type { Subscription } from '@jgaehring/connector/lib/observer';
 import type { DataCapOpts } from './DataCapture';
@@ -29,6 +30,17 @@ export default function useDataCapture(connector: Connector, overrides?: OptionO
 
   if (typeof url !== 'string' && !(url instanceof URL)) {
     url = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
+  }
+
+  const username = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_USERNAME');
+  const password = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_PASSWORD');
+  if (username && password) {
+    options.headers = new Headers(options.headers);
+    if (!options.headers.has('Authorization')) {
+      const buf = Buffer.from(username + ':' + password, 'utf-8');
+      const credentials = `Basic ${buf.toString('base64')}`;
+      options.headers.set('Authorization', credentials);
+    }
   }
 
   try {

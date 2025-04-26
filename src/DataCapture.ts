@@ -1,4 +1,4 @@
-import type { fetch as UndiciFetch } from 'undici';
+import type { fetch as UndiciFetch, Headers, HeadersInit } from 'undici';
 import type { Observer } from '@jgaehring/connector/lib/observer';
 
 function validate(maybeUrl: unknown): URL | false {
@@ -11,15 +11,23 @@ type fetchFn = typeof UndiciFetch | typeof globalThis.fetch;
 export interface DataCapOpts {
   verbose?: boolean;
   fetch?: fetchFn;
+  headers?: HeadersInit;
 }
 
 export default class DataCapture implements Observer<string> {
   private _url: URL | null = null;
   private fetchFn: fetchFn;
 
+  public readonly headers: Headers;
   public verbose: boolean = false;
 
   constructor(maybeUrl?: URL | string, options?: DataCapOpts) {
+    const h = options?.headers as globalThis.HeadersInit;
+    this.headers = new globalThis.Headers(h) as Headers;
+    if (!this.headers.has('Content-Type')) {
+      this.headers.set('Content-Type', 'application/ld+json');
+    }
+
     if (typeof options?.verbose === 'boolean') this.verbose = options.verbose;
 
     if (typeof options?.fetch === 'function') this.fetchFn = options.fetch;
@@ -68,7 +76,7 @@ export default class DataCapture implements Observer<string> {
 
   next(json: string): void {
     if (this._url) {
-      const opts = { method: 'POST', body: json };
+      const opts = { method: 'POST', headers: this.headers, body: json };
       const request = this.fetchFn(this._url, opts);
       if (this.verbose) {
         request.then((response) => { console.info(response); })
