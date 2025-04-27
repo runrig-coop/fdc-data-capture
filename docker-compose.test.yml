@@ -1,0 +1,12 @@
+services:
+  fuseki:
+    image: semapps/jena-fuseki-webacl
+    container_name: fuseki
+    restart: always
+    volumes:
+      - ./data/fuseki:/fuseki
+    ports:
+      - "3030:3030"
+    expose:
+      - "3030"
+    env_file: "test.env"
