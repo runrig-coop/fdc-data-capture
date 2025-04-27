@@ -7,6 +7,11 @@
 /// <reference path="../types/environment.d.ts"/>
 type EnvVarKey = keyof NodeJS.ProcessEnv
 
+export const EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL = 'EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL';
+export const EXPERIMENTAL_DATA_CAPTURE_VERBOSE = 'EXPERIMENTAL_DATA_CAPTURE_VERBOSE';
+export const EXPERIMENTAL_DATA_CAPTURE_USERNAME = 'EXPERIMENTAL_DATA_CAPTURE_USERNAME';
+export const EXPERIMENTAL_DATA_CAPTURE_PASSWORD = 'EXPERIMENTAL_DATA_CAPTURE_PASSWORD';
+
 // Retrieve env vars that are intended to represent a BOOLEAN values.
 export function getEnvVarBool(key: EnvVarKey): boolean {
   // @ts-ignore

@@ -3,8 +3,15 @@ import Undici, { Headers } from 'undici';
 import type { Connector } from '@jgaehring/connector';
 import type { Subscription } from '@jgaehring/connector/lib/observer';
 import type { DataCapOpts } from './DataCapture';
-import DataCapture from './DataCapture';
-import { getEnvVarBool, getEnvVarString } from './env';
+import DataCapture from './DataCapture.js';
+import {
+  EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL,
+  EXPERIMENTAL_DATA_CAPTURE_PASSWORD,
+  EXPERIMENTAL_DATA_CAPTURE_USERNAME,
+  EXPERIMENTAL_DATA_CAPTURE_VERBOSE,
+  getEnvVarBool,
+  getEnvVarString,
+} from './environment.js';
 
 interface DataCapState {
   observer: DataCapture | null;
@@ -24,16 +31,16 @@ export default function useDataCapture(connector: Connector, overrides?: OptionO
   if (fetchIsMissing) options.fetch = Undici.fetch;
 
   if (typeof options.verbose !== 'boolean') {
-    const verbose = getEnvVarBool('EXPERIMENTAL_DATA_CAPTURE_VERBOSE');
+    const verbose = getEnvVarBool(EXPERIMENTAL_DATA_CAPTURE_VERBOSE);
     if (typeof verbose === 'boolean') options.verbose = verbose;
   }
 
   if (typeof url !== 'string' && !(url instanceof URL)) {
-    url = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL');
+    url = getEnvVarString(EXPERIMENTAL_DATA_CAPTURE_EXPORT_URL);
   }
 
-  const username = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_USERNAME');
-  const password = getEnvVarString('EXPERIMENTAL_DATA_CAPTURE_PASSWORD');
+  const username = getEnvVarString(EXPERIMENTAL_DATA_CAPTURE_USERNAME);
+  const password = getEnvVarString(EXPERIMENTAL_DATA_CAPTURE_PASSWORD);
   if (username && password) {
     options.headers = new Headers(options.headers);
     if (!options.headers.has('Authorization')) {
