@@ -1,5 +1,5 @@
-import type Connector from '../../../src/Connector';
-import type { Subscription } from '../../../src/observer';
+import type { Connector } from '@jgaehring/connector';
+import type { Subscription } from '@jgaehring/connector/lib/observer';
 import type { DataCapOpts } from './DataCapture';
 import DataCapture from './DataCapture';
 import { getEnvVarBool, getEnvVarString } from './env';

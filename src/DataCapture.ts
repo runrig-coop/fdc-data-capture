@@ -1,4 +1,4 @@
-import type { Observer } from '../../../src/observer';
+import type { Observer } from '@jgaehring/connector/lib/observer';
 
 function validate(maybeUrl: unknown): URL | false {
   if (!(maybeUrl instanceof URL || typeof maybeUrl === 'string')) return false;
