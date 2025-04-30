@@ -2,7 +2,7 @@
   "name": "dfc-data-capture",
   "version": "0.0.1",
   "description": "Aggregate semantic sales data for FDC/DFC compliant platform cooperatives.",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "type": "module",
   "scripts": {
     "build": "tsc -p .",
