@@ -1,5 +1,5 @@
 import type { fetch as UndiciFetch, Headers, HeadersInit } from 'undici';
-import type { Observer } from '@jgaehring/connector/lib/observer';
+import type { Observer } from '@datafoodconsortium/connector/lib/observer';
 
 function validate(maybeUrl: unknown): URL | false {
   if (!(maybeUrl instanceof URL || typeof maybeUrl === 'string')) return false;

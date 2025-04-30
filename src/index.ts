@@ -1,5 +1,5 @@
-import DataCapture from "./DataCapture";
-import useDataCapture from "./useDataCapture";
+import DataCapture from "./DataCapture.js";
+import useDataCapture from "./useDataCapture.js";
 
 export {
   DataCapture,

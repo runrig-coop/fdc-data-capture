@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import Undici, { Headers } from 'undici';
-import type { Connector } from '@jgaehring/connector';
-import type { Subscription } from '@jgaehring/connector/lib/observer';
+import type { Connector } from '@datafoodconsortium/connector';
+import type { Subscription } from '@datafoodconsortium/connector/lib/observer';
 import type { DataCapOpts } from './DataCapture';
 import DataCapture from './DataCapture.js';
 import {

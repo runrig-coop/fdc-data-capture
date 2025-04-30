@@ -1,8 +1,8 @@
 import expect from 'node:assert';
 import { suite, test } from 'node:test';
 import { MockAgent, setGlobalDispatcher } from 'undici';
-import { Connector } from '@jgaehring/connector';
-import { useDataCapture } from '../lib';
+import { Connector } from '@datafoodconsortium/connector';
+import { useDataCapture } from '../lib/index.js';
 
 suite('DataCapture', async () => {
   const agent = new MockAgent({ enableCallHistory: true });
