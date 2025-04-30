@@ -1,2 +1,4 @@
-lib/
+# Commented out for distribution branch ONLY, so that `lib/` can be prebuilt,
+# pushed to GitHub, and installed from there rather than npm registry.
+# lib/
 node_modules/
